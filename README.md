@@ -60,8 +60,6 @@ Built with:
    ```
 3. **Access the app** Open your browser and navigate to `http://127.0.0.1:5000/`.
 
-
-
 ## Reminder
 
 ### If you need to modify the model during development, be sure to run the following command in the virtual environment after the change:
@@ -69,35 +67,38 @@ Built with:
 flask db migrate -m "describe changes"
 flask db upgrade
 
-
 ## Project Structure
 
+```text
 CITS5505-Group-60-project/
 ├── app/
-│ ├── auth/ # Authentication blueprint (registration, login)
-│ │ ├── init.py
-│ │ ├── forms.py
-│ │ └── routes.py
-│ ├── errors/ # Error handling blueprint (404, 500 pages)
-│ │ ├── init.py
-│ │ └── handlers.py
-│ ├── main/ # Main function blueprint
-│ │ ├── init.py
-│ │ ├── forms.py
-│ │ └── routes.py
-│ ├── static/ # Static Resources
-│ │ ├── css/
-│ │ ├── js/
-│ │ └── images/
-│ ├── templates/ #Jinja2 Templates
-│ ├── init.py # Application create_app()
-│ └── models.py # SQLAlchemy Model
+│   ├── auth/      # Authentication blueprint (registration, login)
+│   │   ├── __init__.py
+│   │   ├── forms.py
+│   │   └── routes.py
+│   ├── errors/    # Error handling blueprint (404, 500 pages)
+│   │   ├── __init__.py
+│   │   └── handlers.py
+│   ├── main/      # Main function blueprint
+│   │   ├── __init__.py
+│   │   ├── forms.py
+│   │   └── routes.py
+│   ├── static/    # Static Resources
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── images/
+│   ├── templates/ # Jinja2 Templates
+│   ├── __init__.py # Application create_app()
+│   └── models.py   # SQLAlchemy Model
 │
-├── migrations/ # Flask-Migrate migration script
-├── app.db # SQLite database files
-├── config.py # Configuration
-├── requirements.txt # Python Dependencies
-├── run.py # Application entry
-└── README.md #
+├── migrations/        # Flask-Migrate migration script
+├── app.db             # SQLite database file
+├── config.py          # Configuration
+├── requirements.txt   # Python Dependencies
+├── run.py             # Application entry
+└── README.md
+
+```
+
 
 ## Running Tests

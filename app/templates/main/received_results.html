@@ -4,48 +4,24 @@
 <div class="container mt-4">
   <h3>📥 Private Matches Shared With Me</h3>
   {% if private_matches %}
-  <table class="table table-striped">
-    <thead><tr>
-      <th>Date</th><th>Tourney</th><th>Players</th><th>Score</th><th>Winner</th>
-    </tr></thead>
-    <tbody>
-      {% for m in private_matches %}
-      <tr>
-        <td>{{ m.match_date.strftime('%Y-%m-%d') }}</td>
-        <td>{{ m.tournament_name }}</td>
-        <td>{{ m.player1 }} vs {{ m.player2 }}</td>
-        <td>{{ m.score }}</td>
-        <td>{{ m.winner }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Date</th><th>Tourney</th><th>Players</th><th>Score</th><th>Winner</th></tr>
+      </thead>
+      <tbody>
+        {% for m in private_matches %}
+        <tr>
+          <td>{{ m.match_date.strftime('%Y-%m-%d') }}</td>
+          <td>{{ m.tournament_name }}</td>
+          <td>{{ m.player1 }} vs {{ m.player2 }}</td>
+          <td>{{ m.score }}</td>
+          <td>{{ m.winner }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% else %}
     <p class="text-muted">No private results shared with you yet.</p>
-  {% endif %}
-
-  <hr class="my-4">
-
-  <h3>🌍 Public Shared Matches</h3>
-  {% if public_matches %}
-  <table class="table table-bordered">
-    <thead><tr>
-      <th>Date</th><th>Tourney</th><th>Players</th><th>Score</th><th>Winner</th>
-    </tr></thead>
-    <tbody>
-      {% for m in public_matches %}
-      <tr>
-        <td>{{ m.match_date.strftime('%Y-%m-%d') }}</td>
-        <td>{{ m.tournament_name }}</td>
-        <td>{{ m.player1 }} vs {{ m.player2 }}</td>
-        <td>{{ m.score }}</td>
-        <td>{{ m.winner }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-    <p class="text-muted">No public results available yet.</p>
   {% endif %}
 </div>
 {% endblock %}

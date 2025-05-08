@@ -7,10 +7,46 @@
     <div class="card"><div class="card-body">
       <h4 class="card-title">Share Match Results</h4>
 
-      <!-- Public/Private Switch -->
-      <div class="form-check form-switch mb-3">
-        <input class="form-check-input" type="checkbox" id="togglePublic">
-        <label class="form-check-label" for="togglePublic">Make Public</label>
+      <div class="mb-3">
+        <label class="form-label">Select Users to Share With:</label>
+        <div class="d-flex gap-2">
+          <select id="shareUsers" class="form-select" multiple size="5" style="width:100%; max-width:400px;"></select>
+          <div class="d-flex flex-column gap-1">
+            <button class="btn btn-sm btn-outline-secondary" id="clearUsers" type="button">Clear</button>
+          </div>
+        </div>
+        <div class="form-text text-muted mt-1">
+          You cannot share with yourself or users you've already shared this match with.
+        </div>
+      </div>
+      
+      <div class="table-responsive mt-4">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="checkAll"></th>
+              <th>Date</th>
+              <th>Tournament</th>
+              <th>Players</th>
+              <th>Score</th>
+              <th>Winner</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in match_results %}
+            <tr data-id="{{ m.id }}">
+              <td>
+                <input type="checkbox" class="match-checkbox" value="{{ m.id }}">
+              </td>
+              <td>{{ m.match_date.strftime('%Y-%m-%d') }}</td>
+              <td>{{ m.tournament_name }}</td>
+              <td>{{ m.player1 }} vs {{ m.player2 }}</td>
+              <td>{{ m.score }}</td>
+              <td>{{ m.winner }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 
       <!-- Private sharing user -->
@@ -27,64 +63,18 @@
         </div>
       </div>
 
-      <!-- List of matches -->
-      <div class="table-responsive mt-4">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th><input type="checkbox" id="checkAll"></th>
-              <th>Date</th><th>Tournament</th><th>Players</th><th>Score</th><th>Winner</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in match_results %}
-            <tr data-id="{{ m.id }}">
-              <td><input type="checkbox" class="match-checkbox" value="{{ m.id }}"></td>
-              <td>{{ m.match_date.strftime('%Y-%m-%d') }}</td>
-              <td>{{ m.tournament_name }}</td>
-              <td>{{ m.player1 }} vs {{ m.player2 }}</td>
-              <td>{{ m.score }}</td>
-              <td>{{ m.winner }}</td>
-              <td>
-                <span class="badge bg-info public-badge" style="display:none">Public</span>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
       <button id="btnShare" class="btn btn-primary mt-3">Share Selected</button>
 
-      <!-- Flash messages -->
+      <!-- 后端闪现消息 -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          {% for category, msg in messages %}
-            <div class="alert alert-{{ category }} mt-3">{{ msg }}</div>
-          {% endfor %}
+          <div class="mt-3">
+            {% for category, msg in messages %}
+              <div class="alert alert-{{ category }}">{{ msg }}</div>
+            {% endfor %}
+          </div>
         {% endif %}
       {% endwith %}
-
-      <!-- Share History -->
-      <h4 class="mt-5">Share History</h4>
-      {% if share_history %}
-      <ul class="list-group">
-        {% for s in share_history %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span>
-            {% if s.is_public %}
-              <span class="badge bg-success me-2">Public</span>
-            {% else %}
-              <span class="badge bg-secondary me-2">To {{ s.recipient.username }}</span>
-            {% endif %}
-            #{{ s.match_result_id }} @ {{ s.timestamp.strftime('%Y-%m-%d %H:%M') }}
-          </span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p class="text-muted">No share history found.</p>
-      {% endif %}
     </div></div>
   </div>
 </div>
@@ -92,11 +82,10 @@
 
 {% block scripts %}
   <script>
-    // Injection into the template: data passed from the backend
-    const sharedMap     = {{ shared_map|tojson }};
-    const allUsers      = {{ all_users_data|tojson }};
-    const currentUser   = {{ current_username|tojson }};
-    const publicShared  = {{ public_shared_ids|tojson }};
+    // 从后端注入的数据
+    const sharedMap   = {{ shared_map|tojson }};      // { match_id: [user_id, ...], … }
+    const allUsers    = {{ all_users_data|tojson }};  // [ { id, username }, … ]
+    const currentUser = {{ current_username|tojson }}; 
   </script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="{{ url_for('static', filename='js/share.js') }}"></script>

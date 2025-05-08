@@ -1,12 +1,10 @@
-// static/js/share.js
 
 $(function () {
-  const togglePublic     = $('#togglePublic');
-  const userSelect       = $('#shareUsers')[0];
-  const checkAllMatches  = $('#checkAll');
-  const shareBtn         = $('#btnShare');
+  const userSelect      = $('#shareUsers')[0];
+  const checkAllMatches = $('#checkAll');
+  const shareBtn        = $('#btnShare');
 
-  //—— OptionGroup auxiliary constructor——
+  // —— OptionGroup 辅助构造 —— 
   function OptionGroup(label) {
     this.el = document.createElement('optgroup');
     this.el.label = label;
@@ -14,38 +12,33 @@ $(function () {
     this.append = o => this.el.appendChild(o);
   }
 
-  //—— Switch private user area display & initialize list & update Public badge ——
-  function toggleUserSection() {
-    const isPub = togglePublic.is(':checked');
-    $('#privateUsersSection').toggle(!isPub);
-    populateUsers();
-    updatePublicBadges();
-  }
-  togglePublic.on('change', toggleUserSection);
-
-  //——Select All/Deselect Match——
+  // —— 全选/反选比赛 —— 
   checkAllMatches.on('change', () => {
-    $('.match-checkbox').prop('checked', checkAllMatches.is(':checked'));
+    const checked = checkAllMatches.is(':checked');
+    $('.match-checkbox').prop('checked', checked);
     populateUsers();
-    updatePublicBadges();
   });
   $('.match-checkbox').on('change', () => {
     populateUsers();
-    updatePublicBadges();
   });
 
-  //—— Click the share button——
+  // —— 全选/清空 用户列表 —— 
+  $('#selectAllUsers').on('click', () => {
+    $('#shareUsers option:not(:disabled)').prop('selected', true);
+  });
+  $('#clearUsers').on('click', () => {
+    $('#shareUsers option:selected').prop('selected', false);
+  });
+
+  // —— 点击分享按钮 —— 
   shareBtn.on('click', async () => {
     const matchIds = $('.match-checkbox:checked').map((_, el) => el.value).get();
-    const isPublic = togglePublic.is(':checked');
-    const usernames = isPublic
-      ? []
-      : [...userSelect.selectedOptions].map(o => o.value);
+    const usernames = [...userSelect.selectedOptions].map(o => o.value);
 
     if (!matchIds.length) {
       return alert('⚠️ Please select at least one match.');
     }
-    if (!isPublic && !usernames.length) {
+    if (!usernames.length) {
       return alert('⚠️ Please select at least one recipient.');
     }
 
@@ -53,12 +46,11 @@ $(function () {
       const res = await fetch('/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ match_ids: matchIds, usernames, public: isPublic })
+        body: JSON.stringify({ match_ids: matchIds, usernames })
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || res.statusText);
-      }
+      if (!res.ok) throw new Error(data.message || res.statusText);
+
       alert('✅ Share success!');
       location.reload();
     } catch (err) {
@@ -66,56 +58,51 @@ $(function () {
     }
   });
 
-  //—— Update private user drop-down content——
+  // —— 更新用户下拉列表 —— 
   function populateUsers() {
-    const selectedIds = $('.match-checkbox:checked').map((_, el) => parseInt(el.value, 10)).get();
+    // 1. 记录之前已经选中的用户名
+    const prevSelected = new Set(
+      [...userSelect.selectedOptions].map(o => o.value)
+    );
+
+    // 2. 找出所有被选中比赛所对应的已分享用户 ID
+    const selectedIds = $('.match-checkbox:checked')
+      .map((_, el) => parseInt(el.value, 10))
+      .get();
     const disabledSet = new Set();
     selectedIds.forEach(id => {
       (sharedMap[id] || []).forEach(uid => disabledSet.add(uid));
     });
 
-    // Clear old options
+    // 3. 清空当前选项
     userSelect.innerHTML = '';
 
-    const newGroup = new OptionGroup('Selectable users');
-    const oldGroup = new OptionGroup('Shared (not optional)');
+    const selectableGroup = new OptionGroup('Selectable users');
+    const disabledGroup   = new OptionGroup('Already shared');
 
     allUsers.forEach(u => {
       const o = document.createElement('option');
       o.value = u.username;
       o.textContent = u.username;
-      if (u.username === currentUser) {
+
+      // 自己或已分享的放到 disabledGroup
+      if (u.username === currentUser || disabledSet.has(u.id)) {
         o.disabled = true;
-        o.textContent += '(Own)';
-        oldGroup.append(o);
-      } else if (disabledSet.has(u.id)) {
-        o.disabled = true;
-        o.textContent += '(Shared privately)';
-        oldGroup.append(o);
+        o.textContent += (u.username === currentUser) ? ' (Own)' : ' (Shared)';
+        disabledGroup.append(o);
       } else {
-        newGroup.append(o);
+        // 可选用户：如果之前选中过，保留选中状态
+        if (prevSelected.has(u.username)) {
+          o.selected = true;
+        }
+        selectableGroup.append(o);
       }
     });
 
-    if (newGroup.hasChildren()) userSelect.appendChild(newGroup.el);
-    if (oldGroup.hasChildren()) userSelect.appendChild(oldGroup.el);
+    if (selectableGroup.hasChildren()) userSelect.appendChild(selectableGroup.el);
+    if (disabledGroup.hasChildren())   userSelect.appendChild(disabledGroup.el);
   }
 
-  // -- Update the display of the Public badge --
-  function updatePublicBadges() {
-    const show = togglePublic.is(':checked');
-    $('tr[data-id]').each((_, row) => {
-      const $row  = $(row);
-      const id    = parseInt($row.attr('data-id'), 10);
-      const badge = $row.find('.public-badge');
-      if (show && publicShared.includes(id)) {
-        badge.show();
-      } else {
-        badge.hide();
-      }
-    });
-  }
-
-  //—— Initialized when the page first loads——
-  toggleUserSection();
+  // —— 页面初次加载时初始化 —— 
+  populateUsers();
 });
