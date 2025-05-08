@@ -1,30 +1,33 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('userSearch');
-  
-    // Search function: filter the user list based on input
-    if (searchInput) {
-      searchInput.addEventListener('input', function () {
-        const filter = this.value.toLowerCase();
-        document.querySelectorAll('#userList .form-check').forEach(item => {
-          const labelText = item.querySelector('label').textContent.toLowerCase();
-          item.style.display = labelText.includes(filter) ? '' : 'none';
-        });
-      });
-    }
-  
-    // Select all optional users
-    document.getElementById('btnSelectAll')?.addEventListener('click', () => {
-      document.querySelectorAll('.user-checkbox:not(:disabled)').forEach(cb => {
-        // Only select users that are not already shared (not disabled)
-        cb.checked = true;
-      });
-    });
-  
-    // Clear all user selections
-    document.getElementById('btnClearAll')?.addEventListener('click', () => {
-      document.querySelectorAll('.user-checkbox').forEach(cb => {
-        cb.checked = false;
-      });
-    });
+  // Initialize Select2 on the shareUsers dropdown
+  $('#shareUsers').select2({
+    data: allUsers.map(user => ({
+      id: user.id,
+      text: user.username
+    })),
+    placeholder: "Type to search users...",
+    width: '100%'
   });
-  
+
+  // Prevent selecting current user or users already shared with
+  $('#shareUsers').on('select2:select', function (e) {
+    const selectedId = e.params.data.id;
+    const selectedUsername = allUsers.find(u => u.id === selectedId)?.username;
+
+    // Check if selected user is current user or already shared with
+    const isInvalid = selectedId === currentUser || Object.values(sharedMap).flat().includes(selectedUsername);
+
+    if (isInvalid) {
+      // Remove invalid selection
+      let selected = $('#shareUsers').val();
+      selected = selected.filter(val => val !== selectedId.toString());
+      $('#shareUsers').val(selected).trigger('change');
+      alert("You cannot share with yourself or users you've already shared this match with.");
+    }
+  });
+
+  // Clear All selections
+  document.getElementById('clearUsers')?.addEventListener('click', () => {
+    $('#shareUsers').val(null).trigger('change');
+  });
+});

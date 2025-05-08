@@ -461,6 +461,7 @@ def share():
             ShareResult.query
             .filter_by(sender_id=current_user.id)
             .order_by(desc(ShareResult.timestamp))
+            .limit(5)
             .all()
         )
         # 3) All other users → Private sharing pulls down and the page is rendered

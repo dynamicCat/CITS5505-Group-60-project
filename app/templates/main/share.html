@@ -17,9 +17,8 @@
       <div class="mb-3" id="privateUsersSection">
         <label class="form-label">Select Users to Share With:</label>
         <div class="d-flex gap-2">
-          <select id="shareUsers" class="form-select" multiple size="5" style="width: 100%; max-width: 400px;"></select>
+          <select id="shareUsers" class="form-select" multiple style="width: 100%; max-width: 400px;"></select>
           <div class="d-flex flex-column gap-1">
-            <button class="btn btn-sm btn-secondary" id="selectAllUsers" type="button">Select All</button>
             <button class="btn btn-sm btn-outline-secondary" id="clearUsers" type="button">Clear</button>
           </div>
         </div>
@@ -102,4 +101,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="{{ url_for('static', filename='js/share.js') }}"></script>
   <script src="{{ url_for('static', filename='js/share_users.js') }}"></script>
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 {% endblock %}
